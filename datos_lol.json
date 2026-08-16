@@ -1,1 +1,77 @@
-
+{
+  "nombre": "Galactic Shark #AYK",
+  "region": "LA1",
+  "summoner": {
+    "profileIconId": 6664,
+    "summonerLevel": 430
+  },
+  "soloQ": {
+    "tier": "SILVER",
+    "rank": "II",
+    "lp": 50,
+    "wins": 9,
+    "losses": 10,
+    "winrate": 47
+  },
+  "maestria": [
+    {
+      "championId": 84,
+      "championName": "Akali",
+      "points": 330654,
+      "level": 31
+    },
+    {
+      "championId": 78,
+      "championName": "Poppy",
+      "points": 203060,
+      "level": 20
+    },
+    {
+      "championId": 55,
+      "championName": "Katarina",
+      "points": 143015,
+      "level": 15
+    },
+    {
+      "championId": 876,
+      "championName": "Lillia",
+      "points": 138531,
+      "level": 15
+    },
+    {
+      "championId": 498,
+      "championName": "Xayah",
+      "points": 93802,
+      "level": 10
+    }
+  ],
+  "recientes": [
+    {
+      "champ": "Lillia",
+      "partidas": 6
+    },
+    {
+      "champ": "Aurora",
+      "partidas": 2
+    },
+    {
+      "champ": "Poppy",
+      "partidas": 1
+    },
+    {
+      "champ": "Akali",
+      "partidas": 1
+    }
+  ],
+  "roles": [
+    {
+      "rol": "JUNGLE",
+      "partidas": 7
+    },
+    {
+      "rol": "MIDDLE",
+      "partidas": 3
+    }
+  ],
+  "ddraggon_ver": "14.24.1"
+}
