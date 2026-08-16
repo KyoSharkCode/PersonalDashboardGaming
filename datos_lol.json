@@ -73,5 +73,37 @@
       "partidas": 3
     }
   ],
+  "historial": [
+    {
+      "campeon": "Lillia",
+      "kda": "3/11/13 (1.5)",
+      "resultado": "Derrota",
+      "duracion": "36min"
+    },
+    {
+      "campeon": "Poppy",
+      "kda": "10/8/3 (1.6)",
+      "resultado": "Derrota",
+      "duracion": "29min"
+    },
+    {
+      "campeon": "Lillia",
+      "kda": "5/5/4 (1.8)",
+      "resultado": "Derrota",
+      "duracion": "25min"
+    },
+    {
+      "campeon": "Lillia",
+      "kda": "16/9/16 (3.6)",
+      "resultado": "Victoria",
+      "duracion": "43min"
+    },
+    {
+      "campeon": "Lillia",
+      "kda": "6/5/8 (2.8)",
+      "resultado": "Derrota",
+      "duracion": "34min"
+    }
+  ],
   "ddraggon_ver": "14.24.1"
 }
