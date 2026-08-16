@@ -24,15 +24,21 @@ jobs:
       - name: Instalar dependencias
         run: pip install requests
 
-      - name: Actualizar stats (LoL + Valorant)
+      - name: Actualizar stats (LoL)
         env:
           RIOT_API_KEY: ${{ secrets.RIOT_API_KEY }}
         run: python actualizar_stats.py
+
+      - name: Actualizar estado Twitch
+        env:
+          TWITCH_CLIENT_ID: ${{ secrets.TWITCH_CLIENT_ID }}
+          TWITCH_CLIENT_SECRET: ${{ secrets.TWITCH_CLIENT_SECRET }}
+        run: python live_twitch.py
 
       - name: Guardar cambios en GitHub
         run: |
           git config --global user.name 'StatsBot'
           git config --global user.email 'statsbot@github.com'
-          git add datos_lol.json
+          git add datos_lol.json live_twitch.json
           git diff --staged --quiet || git commit -m "Actualizacion automatica de stats"
           git push
