@@ -8,10 +8,10 @@
   "soloQ": {
     "tier": "SILVER",
     "rank": "I",
-    "lp": 10,
+    "lp": 0,
     "wins": 11,
-    "losses": 10,
-    "winrate": 52
+    "losses": 11,
+    "winrate": 50
   },
   "maestria": [
     {
