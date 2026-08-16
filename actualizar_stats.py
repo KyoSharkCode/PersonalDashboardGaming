@@ -250,58 +250,70 @@ def generar_datos_valo():
     puuid = acc_res.json()["puuid"]
     log(f"✅ PUUID Valo obtenido")
 
-    # Rango Valorant via Riot API oficial
-    url_mmr = (
-        f"https://la.api.riotgames.com"
-        f"/val/ranked/v1/leaderboards/by-act/{{act_id}}"
-    )
-    # Usamos el endpoint de cuenta de Valorant
-    url_account_valo = (
-        f"https://la.api.riotgames.com"
-        f"/val/content/v1/contents"
-    )
-
-    # El rango de Valo no está en la API de dev con key básica.
-    # Usamos HenrikDev solo para el rango (es más permisivo con espacios en v1)
-    name_enc = RIOT_NAME.replace(" ", "%20")
-    tag_enc  = quote(RIOT_TAG)
-
-    mmr_res = requests.get(
-        f"https://api.henrikdev.xyz/valorant/v2/by-puuid/mmr/latam/{puuid}",
-        timeout=10
-    )
+    # Rango Valorant via Riot API oficial (val/ranked)
+    # La API de desarrollo de Riot no expone rango individual de Valo,
+    # pero sí podemos obtener partidas recientes con Match v1 de Valorant.
     current = {}
-    if mmr_res.status_code == 200:
-        mmr_data = mmr_res.json().get("data", {})
-        current  = mmr_data.get("current_data", {})
-        log(f"✅ Rango Valo: {current.get('currenttierpatched', 'Sin clasificar')}")
-    else:
-        log(f"⚠️ MMR Valo → {mmr_res.status_code}. Sin rango.")
+    top_agents = []
+    top_roles  = []
 
-    # Partidas recientes via HenrikDev by-puuid (evita problema de espacios)
-    match_res = requests.get(
-        f"https://api.henrikdev.xyz/valorant/v1/by-puuid/lifetime/matches/latam/{puuid}?mode=competitive&size=10",
-        timeout=15
+    # Partidas Valorant via Riot API oficial (val/match/v1)
+    url_matches = (
+        f"https://la.api.riotgames.com"
+        f"/val/match/v1/matchlists/by-puuid/{puuid}"
     )
-    matches = []
-    if match_res.status_code == 200:
-        matches = match_res.json().get("data", [])
-        log(f"✅ {len(matches)} partidas Valo encontradas")
+    match_list_res = requests.get(url_matches, headers=HEADERS, timeout=10)
+
+    if match_list_res.status_code == 200:
+        match_ids_valo = match_list_res.json().get("history", [])[:10]
+        log(f"✅ {len(match_ids_valo)} partidas Valo encontradas")
+
+        agent_count = {}
+        for entry in match_ids_valo:
+            mid = entry.get("matchId", "")
+            if not mid:
+                continue
+            det_res = requests.get(
+                f"https://la.api.riotgames.com/val/match/v1/matches/{mid}",
+                headers=HEADERS, timeout=10
+            )
+            if det_res.status_code != 200:
+                continue
+            det = det_res.json()
+            players = det.get("players", [])
+            yo = next((p for p in players if p.get("puuid") == puuid), None)
+            if yo:
+                ag = yo.get("characterId", "")
+                # characterId es un UUID — obtenemos el nombre del agente
+                agent_name = yo.get("gameName", ag)  # fallback al UUID si no hay nombre
+                # Buscamos en los stats el agente
+                stats = yo.get("stats", {})
+                ag_display = ag  # usaremos el UUID por ahora
+                agent_count[ag_display] = agent_count.get(ag_display, 0) + 1
+
+        top_agents = sorted(agent_count.items(), key=lambda x: x[1], reverse=True)[:5]
+        log(f"✅ Agentes (IDs) más jugados: {[a[0][:8] for a in top_agents]}")
+
+    elif match_list_res.status_code == 403:
+        log("⚠️ val/match/v1 → 403. Esta API requiere permisos especiales de Riot.")
+        log("   Guardando datos básicos de Valorant sin historial de partidas.")
     else:
-        log(f"⚠️ Partidas Valo → {match_res.status_code}. Sin historial.")
+        log(f"⚠️ val/match/v1 → {match_list_res.status_code}. Sin historial.")
 
-    # Agentes más jugados
-    agent_count = {}
-    for match in matches:
-        stats = match.get("stats", {})
-        ag = stats.get("character", {}).get("name", "")
-        if ag:
-            agent_count[ag] = agent_count.get(ag, 0) + 1
+    # Mapa de agentes via valorant-api.com (gratuito, sin key)
+    agents_api = requests.get("https://valorant-api.com/v1/agents?isPlayableCharacter=true", timeout=10)
+    agent_name_map = {}
+    if agents_api.status_code == 200:
+        for ag in agents_api.json().get("data", []):
+            agent_name_map[ag["uuid"].lower()] = ag["displayName"]
+        log(f"✅ Mapa de {len(agent_name_map)} agentes cargado")
 
-    top_agents = sorted(agent_count.items(), key=lambda x: x[1], reverse=True)[:5]
-    log(f"✅ Agentes más jugados: {[a[0] for a in top_agents]}")
+    # Traducir UUIDs a nombres
+    top_agents_named = []
+    for ag_id, count in top_agents:
+        name_ag = agent_name_map.get(ag_id.lower(), ag_id[:8])
+        top_agents_named.append((name_ag, count))
 
-    # Roles por clase de agente
     role_map = {
         "Jett":"Duelista","Reyna":"Duelista","Phoenix":"Duelista","Raze":"Duelista",
         "Neon":"Duelista","Iso":"Duelista","Waylay":"Duelista",
@@ -313,25 +325,20 @@ def generar_datos_valo():
         "Chamber":"Centinela","Deadlock":"Centinela","Vyse":"Centinela"
     }
     role_count = {}
-    for agent, n in top_agents:
-        rol = role_map.get(agent, "Otro")
+    for agent_name_ag, n in top_agents_named:
+        rol = role_map.get(agent_name_ag, "Otro")
         role_count[rol] = role_count.get(rol, 0) + n
     top_roles = sorted(role_count.items(), key=lambda x: x[1], reverse=True)[:3]
 
     datos_valo = {
-        "nombre":   f"{RIOT_NAME} #{RIOT_TAG}",
+        "nombre":  f"{RIOT_NAME} #{RIOT_TAG}",
         "account": {
-            "level":      account.get("account_level"),
-            "card_small": account.get("card", {}).get("small"),
-            "card_wide":  account.get("card", {}).get("wide")
+            "level":      None,
+            "card_small": None,
+            "card_wide":  None
         },
-        "rango": {
-            "tier":          current.get("currenttierpatched"),
-            "rr":            current.get("ranking_in_tier", 0),
-            "rank_img":      current.get("images", {}).get("small"),
-            "elo_total":     current.get("elo")
-        } if current else None,
-        "agentes": [{"agente": a, "partidas": n} for a, n in top_agents],
+        "rango":   None,
+        "agentes": [{"agente": a, "partidas": n} for a, n in top_agents_named],
         "roles":   [{"rol": r, "partidas": n} for r, n in top_roles]
     }
 
@@ -346,5 +353,4 @@ def generar_datos_valo():
 # ─────────────────────────────────────────────────
 if __name__ == "__main__":
     generar_datos_lol()
-    generar_datos_valo()
-    log("🎉 ¡Todo actualizado!")
+    log("🎉 ¡Todo actualizado! (Valorant usa iframe de tracker.gg)")
