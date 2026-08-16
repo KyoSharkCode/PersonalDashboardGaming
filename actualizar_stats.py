@@ -177,7 +177,7 @@ def procesar_partidas(match_ids, puuid):
                 "duracion":  duracion
             })
 
-    top_champs = sorted(champ_count.items(), key=lambda x: x[1], reverse=True)[:5]
+    top_champs = sorted(champ_count.items(), key=lambda x: x[1], reverse=True)[:4]
     top_roles  = sorted(role_count.items(),  key=lambda x: x[1], reverse=True)[:3]
 
     log(f"✅ Campeones más jugados: {[c[0] for c in top_champs]}")
