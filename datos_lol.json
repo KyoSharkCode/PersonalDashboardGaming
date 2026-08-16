@@ -8,10 +8,10 @@
   "soloQ": {
     "tier": "SILVER",
     "rank": "II",
-    "lp": 50,
-    "wins": 9,
+    "lp": 80,
+    "wins": 10,
     "losses": 10,
-    "winrate": 47
+    "winrate": 50
   },
   "maestria": [
     {
@@ -35,7 +35,7 @@
     {
       "championId": 876,
       "championName": "Lillia",
-      "points": 138531,
+      "points": 140393,
       "level": 15
     },
     {
@@ -48,7 +48,7 @@
   "recientes": [
     {
       "champ": "Lillia",
-      "partidas": 6
+      "partidas": 7
     },
     {
       "champ": "Aurora",
@@ -57,23 +57,25 @@
     {
       "champ": "Poppy",
       "partidas": 1
-    },
-    {
-      "champ": "Akali",
-      "partidas": 1
     }
   ],
   "roles": [
     {
       "rol": "JUNGLE",
-      "partidas": 7
+      "partidas": 8
     },
     {
       "rol": "MIDDLE",
-      "partidas": 3
+      "partidas": 2
     }
   ],
   "historial": [
+    {
+      "campeon": "Lillia",
+      "kda": "5/11/17 (2.0)",
+      "resultado": "Victoria",
+      "duracion": "42min"
+    },
     {
       "campeon": "Lillia",
       "kda": "3/11/13 (1.5)",
@@ -97,12 +99,6 @@
       "kda": "16/9/16 (3.6)",
       "resultado": "Victoria",
       "duracion": "43min"
-    },
-    {
-      "campeon": "Lillia",
-      "kda": "6/5/8 (2.8)",
-      "resultado": "Derrota",
-      "duracion": "34min"
     }
   ],
   "ddraggon_ver": "14.24.1"
