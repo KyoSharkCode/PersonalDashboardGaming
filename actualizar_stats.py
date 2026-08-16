@@ -140,31 +140,51 @@ def obtener_detalle_partida(match_id):
 def procesar_partidas(match_ids, puuid):
     champ_count = {}
     role_count  = {}
+    historial   = []
 
     for match_id in match_ids:
         detalle = obtener_detalle_partida(match_id)
         if not detalle:
             continue
-        participantes = detalle.get("info", {}).get("participants", [])
+        info          = detalle.get("info", {})
+        participantes = info.get("participants", [])
         yo = next((p for p in participantes if p.get("puuid") == puuid), None)
         if not yo:
             continue
 
-        champ = yo.get("championName", "")
-        role  = yo.get("teamPosition", "")
+        champ     = yo.get("championName", "")
+        role      = yo.get("teamPosition", "")
+        kills     = yo.get("kills", 0)
+        deaths    = yo.get("deaths", 0)
+        assists   = yo.get("assists", 0)
+        win       = yo.get("win", False)
+        duracion_s = info.get("gameDuration", 0)
+        duracion  = f"{duracion_s // 60}min"
+
+        kda_ratio = round((kills + assists) / max(deaths, 1), 1)
+        kda_str   = f"{kills}/{deaths}/{assists} ({kda_ratio})"
 
         if champ:
             champ_count[champ] = champ_count.get(champ, 0) + 1
         if role:
             role_count[role] = role_count.get(role, 0) + 1
 
+        if len(historial) < 5:
+            historial.append({
+                "campeon":   champ,
+                "kda":       kda_str,
+                "resultado": "Victoria" if win else "Derrota",
+                "duracion":  duracion
+            })
+
     top_champs = sorted(champ_count.items(), key=lambda x: x[1], reverse=True)[:5]
     top_roles  = sorted(role_count.items(),  key=lambda x: x[1], reverse=True)[:3]
 
     log(f"✅ Campeones más jugados: {[c[0] for c in top_champs]}")
     log(f"✅ Roles más jugados: {[r[0] for r in top_roles]}")
+    log(f"✅ Historial últimas 5: {[h['campeon'] for h in historial]}")
 
-    return top_champs, top_roles
+    return top_champs, top_roles, historial
 
 
 # ─────────────────────────────────────────────────
@@ -183,7 +203,7 @@ def generar_datos_lol():
     champ_map = obtener_champions_map()
     match_ids = obtener_partidas(puuid, count=10)
 
-    top_champs, top_roles = procesar_partidas(match_ids, puuid)
+    top_champs, top_roles, historial = procesar_partidas(match_ids, puuid)
 
     # Construir maestría con nombre de campeón
     mastery_out = []
@@ -214,6 +234,7 @@ def generar_datos_lol():
         "maestria":       mastery_out,
         "recientes":      [{"champ": c, "partidas": n} for c, n in top_champs],
         "roles":          [{"rol": r, "partidas": n} for r, n in top_roles],
+        "historial":      historial,
         "ddraggon_ver":   DDRAGON
     }
 
