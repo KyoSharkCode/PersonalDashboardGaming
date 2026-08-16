@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- saved from url=(0095)file:///Users/aiko/Library/Caches/com.spotify.studio/.studio/artifacts/kyosumi-stats/index.html -->
-<html lang="es" class="theme-dark"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<html lang="es" class="theme-dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>KyoSumi — Stats</title>
-  <link href="./index_files/css2" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wdth,wght@75..100,400..700&display=swap" rel="stylesheet" />
   <style>
     /* ===== RESET & BASE ===== */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -398,10 +398,10 @@
     <a href="https://www.tiktok.com/@kyo.sumi" target="_blank" rel="noopener" class="nav-btn">
       <span class="icon">🎵</span> Perfil
     </a>
-    <a href="file:///Users/aiko/Library/Caches/com.spotify.studio/.studio/artifacts/kyosumi-stats/lol.html" class="nav-btn">
+    <a href="lol.html" class="nav-btn">
       <span class="icon">⚔️</span> League of Legends
     </a>
-    <a href="file:///Users/aiko/Library/Caches/com.spotify.studio/.studio/artifacts/kyosumi-stats/valorant.html" class="nav-btn">
+    <a href="valorant.html" class="nav-btn">
       <span class="icon">🔫</span> Valorant
     </a>
     <a href="https://www.twitch.tv/KyoSumiVT" target="_blank" rel="noopener" class="nav-btn twitch-btn" id="twitch-btn">
@@ -415,7 +415,33 @@
     <div class="section-header">
       <span class="game-badge badge-lol">League of Legends</span>
     </div>
-    <div id="lol-content"><div class="status-msg error">⚠️ Conecta tu API key en config o sube datos_lol.json</div></div>
+    <div id="lol-content">
+      <div class="profile-row">
+        <div class="profile-avatar skeleton" id="lol-avatar">
+          <img id="lol-avatar-img" src="" alt="Ícono de invocador" style="display:none" />
+        </div>
+        <div class="profile-info">
+          <div class="profile-name" id="lol-name"><div class="skeleton-line" style="width:160px"></div></div>
+          <div class="profile-rank" id="lol-rank">
+            <div class="skeleton-line" style="width:120px;margin:0"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sub-block">
+        <div class="sub-label">Top Maestría</div>
+        <div class="champ-grid" id="lol-mastery">
+          <div class="skeleton-line" style="width:100%;height:70px;border-radius:12px"></div>
+        </div>
+      </div>
+      <div class="sub-block">
+        <div class="sub-label">Más jugados — últimas 10 partidas</div>
+        <div class="champ-grid" id="lol-recent"></div>
+      </div>
+      <div class="sub-block">
+        <div class="sub-label">Top 3 roles</div>
+        <div class="role-list" id="lol-roles"></div>
+      </div>
+    </div>
   </div>
 
   <!-- VALORANT SECTION -->
@@ -423,7 +449,27 @@
     <div class="section-header">
       <span class="game-badge badge-valo">Valorant</span>
     </div>
-    <div id="valo-content"><div class="status-msg error">⚠️ Error: Cuenta Valorant no encontrada. La API externa puede estar limitada.</div></div>
+    <div id="valo-content">
+      <div class="profile-row">
+        <div class="profile-avatar skeleton" id="valo-avatar">
+          <img id="valo-avatar-img" src="" alt="Tarjeta de jugador" style="display:none" />
+        </div>
+        <div class="profile-info">
+          <div class="profile-name" id="valo-name"><div class="skeleton-line" style="width:160px"></div></div>
+          <div class="profile-rank" id="valo-rank">
+            <div class="skeleton-line" style="width:120px;margin:0"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sub-block">
+        <div class="sub-label">Agentes más jugados</div>
+        <div class="champ-grid" id="valo-agents"></div>
+      </div>
+      <div class="sub-block">
+        <div class="sub-label">Top roles</div>
+        <div class="role-list" id="valo-roles"></div>
+      </div>
+    </div>
   </div>
 
   <footer>Made with Studio</footer>
@@ -559,28 +605,36 @@
     }
   }
 
-  function renderLoL({ summoner, soloQ, mastery, matchDetails, puuid, champById }) {
+  function renderLoL(data) {
+    const summoner = data.summoner || {};
+    const soloQ    = data.soloQ;
+    const mastery  = data.maestria  || [];
+    const recientes= data.recientes || [];
+    const roles    = data.roles     || [];
+    const ddragon  = data.ddraggon_ver || "14.24.1";
+    const DD       = `https://ddragon.leagueoflegends.com/cdn/${ddragon}`;
+
     // Avatar
-    const avatarEl = document.getElementById("lol-avatar");
+    const avatarEl  = document.getElementById("lol-avatar");
     const avatarImg = document.getElementById("lol-avatar-img");
-    if (summoner?.profileIconId) {
-      avatarImg.src = `${DDRAGON}/img/profileicon/${summoner.profileIconId}.png`;
+    if (summoner.profileIconId) {
+      avatarImg.src = `${DD}/img/profileicon/${summoner.profileIconId}.png`;
       avatarImg.style.display = "block";
       avatarEl.classList.remove("skeleton");
     }
 
     // Nombre
-    document.getElementById("lol-name").textContent = `${CONFIG.riotName} #${CONFIG.riotTag}`;
+    document.getElementById("lol-name").textContent = data.nombre || `${CONFIG.riotName} #${CONFIG.riotTag}`;
 
     // Rango
     const rankEl = document.getElementById("lol-rank");
-    if (soloQ) {
+    if (soloQ?.tier) {
       const tier = soloQ.tier.charAt(0) + soloQ.tier.slice(1).toLowerCase();
       const rankImgUrl = `https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-shared-components/global/default/${soloQ.tier.toLowerCase()}.png`;
       rankEl.innerHTML = `
         <img class="rank-img" src="${rankImgUrl}" alt="${tier}" onerror="this.style.display='none'" />
         <span class="rank-text">${tier} ${soloQ.rank}</span>
-        <span class="rank-lp">${soloQ.leaguePoints} LP · ${soloQ.wins}W ${soloQ.losses}L</span>
+        <span class="rank-lp">${soloQ.lp} LP · ${soloQ.wins}W ${soloQ.losses}L</span>
       `;
     } else {
       rankEl.innerHTML = `<span class="rank-text" style="color:var(--text-sec)">Sin clasificar</span>`;
@@ -588,13 +642,13 @@
 
     // Maestría top 5
     const mastEl = document.getElementById("lol-mastery");
-    if (mastery?.length) {
+    if (mastery.length) {
       mastEl.innerHTML = mastery.map(m => {
-        const champId = champById ? champById[m.championId] : m.championId;
-        const pts = m.championPoints >= 1000 ? (m.championPoints / 1000).toFixed(0) + "k" : m.championPoints;
+        const champId = m.championName || String(m.championId);
+        const pts = m.points >= 1000 ? (m.points / 1000).toFixed(0) + "k" : m.points;
         return `
           <div class="champ-card">
-            <img class="champ-img" src="${DDRAGON}/img/champion/${champId}.png" alt="${champId}" onerror="this.src=''" />
+            <img class="champ-img" src="${DD}/img/champion/${champId}.png" alt="${champId}" onerror="this.src=''" />
             <span class="champ-name">${champId}</span>
             <span class="champ-points">${pts} pts</span>
           </div>`;
@@ -602,34 +656,24 @@
     }
 
     // Más jugados últimas 10 partidas
-    if (matchDetails?.length) {
-      const count = {};
-      matchDetails.forEach(match => {
-        const me = match.info?.participants?.find(p => p.puuid === puuid);
-        if (me) count[me.championName] = (count[me.championName] || 0) + 1;
-      });
-      const sorted = Object.entries(count).sort((a,b) => b[1]-a[1]).slice(0, 5);
-      document.getElementById("lol-recent").innerHTML = sorted.map(([champ, n]) => `
+    if (recientes.length) {
+      document.getElementById("lol-recent").innerHTML = recientes.map(r => `
         <div class="champ-card">
-          <img class="champ-img" src="${DDRAGON}/img/champion/${champ}.png" alt="${champ}" onerror="this.src=''" />
-          <span class="champ-name">${champ}</span>
-          <span class="champ-points">${n} partidas</span>
+          <img class="champ-img" src="${DD}/img/champion/${r.champ}.png" alt="${r.champ}" onerror="this.src=''" />
+          <span class="champ-name">${r.champ}</span>
+          <span class="champ-points">${r.partidas} partidas</span>
         </div>`).join("");
+    }
 
-      // Top 3 roles
-      const roleCount = {};
-      matchDetails.forEach(match => {
-        const me = match.info?.participants?.find(p => p.puuid === puuid);
-        if (me?.teamPosition) roleCount[me.teamPosition] = (roleCount[me.teamPosition] || 0) + 1;
-      });
-      const roleEmoji = { TOP:"🗡️", JUNGLE:"🌲", MIDDLE:"🔮", BOTTOM:"🏹", UTILITY:"🛡️" };
-      const roleLabel = { TOP:"Top", JUNGLE:"Jungla", MIDDLE:"Mid", BOTTOM:"ADC", UTILITY:"Support" };
-      const topRoles = Object.entries(roleCount).sort((a,b) => b[1]-a[1]).slice(0, 3);
-      document.getElementById("lol-roles").innerHTML = topRoles.map(([role, n], i) => `
+    // Top 3 roles
+    const roleEmoji = { TOP:"🗡️", JUNGLE:"🌲", MIDDLE:"🔮", BOTTOM:"🏹", UTILITY:"🛡️" };
+    const roleLabel = { TOP:"Top", JUNGLE:"Jungla", MIDDLE:"Mid", BOTTOM:"ADC", UTILITY:"Support" };
+    if (roles.length) {
+      document.getElementById("lol-roles").innerHTML = roles.map((r, i) => `
         <div class="role-pill ${i===0?'top-1':i===1?'top-2':''}">
-          <span class="role-icon">${roleEmoji[role]||"🎮"}</span>
-          <span>${roleLabel[role]||role}</span>
-          <span class="role-num">${n}×</span>
+          <span class="role-icon">${roleEmoji[r.rol]||"🎮"}</span>
+          <span>${roleLabel[r.rol]||r.rol}</span>
+          <span class="role-num">${r.partidas}×</span>
         </div>`).join("");
     }
   }
@@ -674,78 +718,68 @@
     }
   }
 
-  function renderValorant({ account, mmrData, matches }) {
+  function renderValorant(data) {
+    if (data.error) {
+      showError("valo-content", data.error);
+      return;
+    }
+
+    const account = data.account || {};
+    const rango   = data.rango;
+    const agentes = data.agentes || [];
+    const roles   = data.roles   || [];
+
     // Avatar
-    const avatarEl = document.getElementById("valo-avatar");
+    const avatarEl  = document.getElementById("valo-avatar");
     const avatarImg = document.getElementById("valo-avatar-img");
-    if (account?.card?.small) {
-      avatarImg.src = account.card.small;
+    if (account.card_small) {
+      avatarImg.src = account.card_small;
       avatarImg.style.display = "block";
       avatarEl.classList.remove("skeleton");
     }
 
     // Nombre
-    document.getElementById("valo-name").textContent = `${CONFIG.riotName} #${CONFIG.riotTag}`;
+    document.getElementById("valo-name").textContent = data.nombre || `${CONFIG.riotName} #${CONFIG.riotTag}`;
 
     // Rango
     const rankEl = document.getElementById("valo-rank");
-    if (mmrData?.current_data) {
-      const d = mmrData.current_data;
+    if (rango?.tier) {
       rankEl.innerHTML = `
-        ${d.images?.small ? `<img class="rank-img" src="${d.images.small}" alt="${d.currenttierpatched}" />` : ""}
-        <span class="rank-text">${d.currenttierpatched || "Sin clasificar"}</span>
-        <span class="rank-lp">${d.ranking_in_tier || 0} RR</span>
+        ${rango.rank_img ? `<img class="rank-img" src="${rango.rank_img}" alt="${rango.tier}" />` : ""}
+        <span class="rank-text">${rango.tier}</span>
+        <span class="rank-lp">${rango.rr || 0} RR</span>
       `;
     } else {
       rankEl.innerHTML = `<span class="rank-text" style="color:var(--text-sec)">Sin clasificar</span>`;
     }
 
     // Agentes más jugados
-    if (matches?.length) {
-      const agentCount = {};
-      const roleCount = {};
-      matches.forEach(match => {
-        const me = match.players?.all_players?.find(
-          p => p.name?.toLowerCase() === CONFIG.riotName.toLowerCase() && p.tag === CONFIG.riotTag
-        );
-        if (me?.character) {
-          agentCount[me.character] = (agentCount[me.character] || 0) + 1;
-        }
-      });
-
-      const topAgents = Object.entries(agentCount).sort((a,b) => b[1]-a[1]).slice(0, 5);
-      document.getElementById("valo-agents").innerHTML = topAgents.map(([agent, n]) => `
-        <div class="champ-card">
-          <img class="champ-img"
-            src="https://media.valorant-api.com/agents/${agent.toLowerCase().replace("/","")}/displayiconsmall.png"
-            alt="${agent}"
-            onerror="this.style.display='none'" />
-          <span class="champ-name">${agent}</span>
-          <span class="champ-points">${n} partidas</span>
-        </div>`).join("");
-
-      // Roles (clases de agentes)
-      const roleMap = {
-        Jett:"Duelista",Reyna:"Duelista",Phoenix:"Duelista",Raze:"Duelista",Neon:"Duelista",Iso:"Duelista",Waylay:"Duelista",
-        Brimstone:"Controlador",Viper:"Controlador",Omen:"Controlador",Astra:"Controlador",Harbor:"Controlador",Clove:"Controlador",
-        Sova:"Iniciador",Breach:"Iniciador",Skye:"Iniciador",Kay_O:"Iniciador",Fade:"Iniciador",Gekko:"Iniciador",
-        Killjoy:"Centinela",Cypher:"Centinela",Sage:"Centinela",Chamber:"Centinela",Deadlock:"Centinela",Vyse:"Centinela"
-      };
-      const roleEmoji = { Duelista:"⚡",Controlador:"💨",Iniciador:"🔦",Centinela:"🔒" };
-      const roleCnt = {};
-      topAgents.forEach(([agent, n]) => {
-        const role = roleMap[agent] || "Otro";
-        roleCnt[role] = (roleCnt[role] || 0) + n;
-      });
-      const topRoles = Object.entries(roleCnt).sort((a,b) => b[1]-a[1]).slice(0, 3);
-      document.getElementById("valo-roles").innerHTML = topRoles.map(([role, n], i) => `
-        <div class="role-pill ${i===0?'top-1':i===1?'top-2':''}">
-          <span class="role-icon">${roleEmoji[role]||"🎮"}</span>
-          <span>${role}</span>
-          <span class="role-num">${n}×</span>
-        </div>`).join("");
+    const roleEmoji = { Duelista:"⚡", Controlador:"💨", Iniciador:"🔦", Centinela:"🔒" };
+    if (agentes.length) {
+      document.getElementById("valo-agents").innerHTML = agentes.map(a => {
+        const agentSlug = a.agente.toLowerCase().replace(/[^a-z]/g, "");
+        return `
+          <div class="champ-card">
+            <img class="champ-img"
+              src="https://media.valorant-api.com/agents/${agentSlug}/displayiconsmall.png"
+              alt="${a.agente}"
+              onerror="this.style.display='none'" />
+            <span class="champ-name">${a.agente}</span>
+            <span class="champ-points">${a.partidas} partidas</span>
+          </div>`;
+      }).join("");
     } else {
       document.getElementById("valo-agents").innerHTML = `<span class="status-msg">Sin partidas recientes.</span>`;
+    }
+
+    // Roles
+    if (roles.length) {
+      document.getElementById("valo-roles").innerHTML = roles.map((r, i) => `
+        <div class="role-pill ${i===0?'top-1':i===1?'top-2':''}">
+          <span class="role-icon">${roleEmoji[r.rol]||"🎮"}</span>
+          <span>${r.rol}</span>
+          <span class="role-num">${r.partidas}×</span>
+        </div>`).join("");
     }
   }
 
@@ -763,6 +797,5 @@
   // Re-chequea Twitch cada 2 minutos
   setInterval(checkTwitch, 120_000);
 </script>
-
-
-</body></html>
+</body>
+</html>
