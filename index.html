@@ -598,10 +598,10 @@
     <a href="https://www.tiktok.com/@kyo.sumi" target="_blank" rel="noopener" class="nav-btn">
       <span class="icon">🎵</span> Perfil
     </a>
-    <a href="lol.html" class="nav-btn">
+    <a href="https://op.gg/lol/summoners/lan/Galactic%20Shark-AYK" target="_blank" rel="noopener" class="nav-btn">
       <span class="icon">⚔️</span> League of Legends
     </a>
-    <a href="valorant.html" class="nav-btn">
+    <a href="https://tracker.gg/valorant/profile/riot/Galactic%20Shark%23AYK/overview" target="_blank" rel="noopener" class="nav-btn">
       <span class="icon">🔫</span> Valorant
     </a>
     <a href="https://www.twitch.tv/KyoSumiVT" target="_blank" rel="noopener" class="nav-btn twitch-btn" id="twitch-btn">
@@ -641,10 +641,6 @@
             <div class="sub-label">Más jugados — últimas 10 partidas</div>
             <div class="champ-grid" id="lol-recent"></div>
           </div>
-          <div class="sub-block">
-            <div class="sub-label">Top 3 roles</div>
-            <div class="role-list" id="lol-roles"></div>
-          </div>
         </div>
 
         <!-- COLUMNA DERECHA — Historial -->
@@ -660,6 +656,13 @@
         </div>
 
       </div>
+
+      <!-- ROLES — centrados en toda la caja -->
+      <div class="sub-block" style="margin-top:20px; margin-bottom:0;">
+        <div class="sub-label" style="text-align:center; margin-bottom:12px;">Top 3 roles</div>
+        <div class="role-list" id="lol-roles" style="justify-content:center;"></div>
+      </div>
+
     </div>
   </div>
 
@@ -887,10 +890,10 @@
       rankEl.innerHTML = `<span class="rank-text" style="color:var(--text-sec)">Sin clasificar</span>`;
     }
 
-    // Maestría top 5
+    // Maestría top 4
     const mastEl = document.getElementById("lol-mastery");
     if (mastery.length) {
-      mastEl.innerHTML = mastery.map(m => {
+      mastEl.innerHTML = mastery.slice(0, 4).map(m => {
         const champId = m.championName || String(m.championId);
         const pts = m.points >= 1000 ? (m.points / 1000).toFixed(0) + "k" : m.points;
         return `
@@ -902,9 +905,9 @@
       }).join("");
     }
 
-    // Más jugados últimas 10 partidas
+    // Más jugados últimas 10 partidas — máx 4
     if (recientes.length) {
-      document.getElementById("lol-recent").innerHTML = recientes.map(r => `
+      document.getElementById("lol-recent").innerHTML = recientes.slice(0, 4).map(r => `
         <div class="champ-card">
           <img class="champ-img" src="${DD}/img/champion/${r.champ}.png" alt="${r.champ}" onerror="this.src=''" />
           <span class="champ-name">${r.champ}</span>
