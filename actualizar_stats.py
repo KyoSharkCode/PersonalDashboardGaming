@@ -224,58 +224,78 @@ def generar_datos_lol():
 
 
 # ─────────────────────────────────────────────────
-# VALORANT — usa HenrikDev API (pública, sin key)
+# VALORANT — usa Riot API oficial (misma key que LoL)
+# PUUID ya lo tenemos, solo necesitamos el rango de Valo
+# y el historial de partidas competitivas
 # ─────────────────────────────────────────────────
 def generar_datos_valo():
     log("📦 Generando datos_valo.json...")
 
-    name = quote(RIOT_NAME)
-    tag  = quote(RIOT_TAG)
+    if not API_KEY:
+        raise Exception("🚨 No se encontró RIOT_API_KEY en las variables de entorno.")
 
-    # Cuenta
-    acc_res = requests.get(
-        f"https://api.henrikdev.xyz/valorant/v1/account/{name}/{tag}",
-        timeout=10
+    # PUUID (mismo que LoL — misma cuenta Riot)
+    url_acc = (
+        f"https://{REGION_ACC}.api.riotgames.com"
+        f"/riot/account/v1/accounts/by-riot-id"
+        f"/{quote(RIOT_NAME)}/{quote(RIOT_TAG)}"
     )
+    acc_res = requests.get(url_acc, headers=HEADERS, timeout=10)
     if acc_res.status_code != 200:
-        log(f"⚠️ HenrikDev account → {acc_res.status_code}. Saltando Valorant.")
-        datos_valo = {"error": "Cuenta no encontrada o API limitada"}
+        log(f"⚠️ Account v1 → {acc_res.status_code}. Saltando Valorant.")
         with open("datos_valo.json", "w", encoding="utf-8") as f:
-            json.dump(datos_valo, f, ensure_ascii=False, indent=2)
+            json.dump({"error": "Cuenta no encontrada"}, f)
         return
 
-    account = acc_res.json().get("data", {})
-    log(f"✅ Cuenta Valo: {account.get('name')}#{account.get('tag')}")
+    puuid = acc_res.json()["puuid"]
+    log(f"✅ PUUID Valo obtenido")
 
-    # MMR / Rango
+    # Rango Valorant via Riot API oficial
+    url_mmr = (
+        f"https://la.api.riotgames.com"
+        f"/val/ranked/v1/leaderboards/by-act/{{act_id}}"
+    )
+    # Usamos el endpoint de cuenta de Valorant
+    url_account_valo = (
+        f"https://la.api.riotgames.com"
+        f"/val/content/v1/contents"
+    )
+
+    # El rango de Valo no está en la API de dev con key básica.
+    # Usamos HenrikDev solo para el rango (es más permisivo con espacios en v1)
+    name_enc = RIOT_NAME.replace(" ", "%20")
+    tag_enc  = quote(RIOT_TAG)
+
     mmr_res = requests.get(
-        f"https://api.henrikdev.xyz/valorant/v2/mmr/latam/{name}/{tag}",
+        f"https://api.henrikdev.xyz/valorant/v2/by-puuid/mmr/latam/{puuid}",
         timeout=10
     )
-    mmr_data = mmr_res.json().get("data", {}) if mmr_res.status_code == 200 else {}
-    current  = mmr_data.get("current_data", {})
-    log(f"✅ Rango Valo: {current.get('currenttierpatched', 'Sin clasificar')}")
+    current = {}
+    if mmr_res.status_code == 200:
+        mmr_data = mmr_res.json().get("data", {})
+        current  = mmr_data.get("current_data", {})
+        log(f"✅ Rango Valo: {current.get('currenttierpatched', 'Sin clasificar')}")
+    else:
+        log(f"⚠️ MMR Valo → {mmr_res.status_code}. Sin rango.")
 
-    # Partidas recientes
+    # Partidas recientes via HenrikDev by-puuid (evita problema de espacios)
     match_res = requests.get(
-        f"https://api.henrikdev.xyz/valorant/v3/matches/latam/{name}/{tag}?mode=competitive&size=10",
+        f"https://api.henrikdev.xyz/valorant/v1/by-puuid/lifetime/matches/latam/{puuid}?mode=competitive&size=10",
         timeout=15
     )
-    matches = match_res.json().get("data", []) if match_res.status_code == 200 else []
-    log(f"✅ {len(matches)} partidas Valo encontradas")
+    matches = []
+    if match_res.status_code == 200:
+        matches = match_res.json().get("data", [])
+        log(f"✅ {len(matches)} partidas Valo encontradas")
+    else:
+        log(f"⚠️ Partidas Valo → {match_res.status_code}. Sin historial.")
 
     # Agentes más jugados
     agent_count = {}
     for match in matches:
-        players = match.get("players", {}).get("all_players", [])
-        yo = next(
-            (p for p in players
-             if p.get("name", "").lower() == RIOT_NAME.lower()
-             and p.get("tag") == RIOT_TAG),
-            None
-        )
-        if yo and yo.get("character"):
-            ag = yo["character"]
+        stats = match.get("stats", {})
+        ag = stats.get("character", {}).get("name", "")
+        if ag:
             agent_count[ag] = agent_count.get(ag, 0) + 1
 
     top_agents = sorted(agent_count.items(), key=lambda x: x[1], reverse=True)[:5]
