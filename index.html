@@ -255,9 +255,28 @@
 
     /* ===== CHAMPION GRID ===== */
     .champ-grid {
-      display: flex;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
       gap: 10px;
-      flex-wrap: wrap;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 4px;
+    }
+
+    .champ-grid::-webkit-scrollbar {
+      height: 4px;
+    }
+    .champ-grid::-webkit-scrollbar-track {
+      background: var(--card2);
+      border-radius: 999px;
+    }
+    .champ-grid::-webkit-scrollbar-thumb {
+      background: var(--purple-dim);
+      border-radius: 999px;
+    }
+    .champ-grid::-webkit-scrollbar-thumb:hover {
+      background: var(--purple-soft);
     }
 
     .champ-card {
@@ -269,7 +288,8 @@
       border: 1px solid var(--border);
       border-radius: 12px;
       padding: 12px 14px;
-      min-width: 72px;
+      min-width: 0;
+      scroll-snap-align: start;
       transition: transform 150ms var(--spring), border-color 150ms ease;
     }
 
@@ -304,6 +324,7 @@
       display: flex;
       gap: 8px;
       flex-wrap: wrap;
+      justify-content: center;
     }
 
     .role-pill {
@@ -345,7 +366,16 @@
       align-items: start;
     }
 
-    .lol-left { min-width: 0; }
+    .lol-left {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .lol-left .sub-block:last-child {
+      margin-top: auto;
+      padding-top: 16px;
+    }
 
     .lol-right {
       min-width: 0;
