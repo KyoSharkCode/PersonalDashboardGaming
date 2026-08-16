@@ -337,6 +337,41 @@
 
     .status-msg.error { border-color: rgba(239,68,68,0.3); color: #fca5a5; }
 
+    /* ===== TRACKER IFRAME ===== */
+    .tracker-link {
+      margin-left: auto;
+      font-size: 12px;
+      font-weight: 600;
+      color: #ff4655;
+      text-decoration: none;
+      opacity: 0.8;
+      transition: opacity 150ms ease;
+    }
+    .tracker-link:hover { opacity: 1; }
+
+    .tracker-iframe {
+      width: 100%;
+      min-height: 520px;
+      border: none;
+      border-radius: 12px;
+      background: var(--card2);
+      display: block;
+    }
+
+    .tracker-fallback {
+      margin-top: 12px;
+      font-size: 12px;
+      color: var(--text-ter);
+      text-align: center;
+    }
+
+    .tracker-fallback a {
+      color: #ff4655;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .tracker-fallback a:hover { text-decoration: underline; }
+
     /* ===== FOOTER ===== */
     footer {
       text-align: center;
@@ -448,26 +483,25 @@
   <div class="section-card" id="valo-card">
     <div class="section-header">
       <span class="game-badge badge-valo">Valorant</span>
+      <a href="https://tracker.gg/valorant/profile/riot/Galactic%20Shark%23AYK/overview"
+         target="_blank" rel="noopener" class="tracker-link">
+        Ver en tracker.gg ↗
+      </a>
     </div>
     <div id="valo-content">
-      <div class="profile-row">
-        <div class="profile-avatar skeleton" id="valo-avatar">
-          <img id="valo-avatar-img" src="" alt="Tarjeta de jugador" style="display:none" />
-        </div>
-        <div class="profile-info">
-          <div class="profile-name" id="valo-name"><div class="skeleton-line" style="width:160px"></div></div>
-          <div class="profile-rank" id="valo-rank">
-            <div class="skeleton-line" style="width:120px;margin:0"></div>
-          </div>
-        </div>
-      </div>
-      <div class="sub-block">
-        <div class="sub-label">Agentes más jugados</div>
-        <div class="champ-grid" id="valo-agents"></div>
-      </div>
-      <div class="sub-block">
-        <div class="sub-label">Top roles</div>
-        <div class="role-list" id="valo-roles"></div>
+      <iframe
+        src="https://tracker.gg/valorant/profile/riot/Galactic%20Shark%23AYK/overview?embed=true"
+        class="tracker-iframe"
+        title="Valorant Stats — Galactic Shark #AYK"
+        allowfullscreen
+        loading="lazy">
+      </iframe>
+      <div class="tracker-fallback">
+        <p>Si el panel no carga, puedes ver tus stats directamente en</p>
+        <a href="https://tracker.gg/valorant/profile/riot/Galactic%20Shark%23AYK/overview"
+           target="_blank" rel="noopener">
+          tracker.gg/valorant/Galactic Shark #AYK ↗
+        </a>
       </div>
     </div>
   </div>
@@ -678,110 +712,7 @@
     }
   }
 
-  /* =============================================
-     VALORANT — usa henrikdev API (no oficial, pública)
-     No requiere key para datos básicos de rango.
-     ============================================= */
-  async function loadValorant() {
-    // Intenta primero cargar JSON pre-generado
-    try {
-      const res = await fetch("datos_valo.json", { cache: "no-store" });
-      if (res.ok) {
-        renderValorant(await res.json());
-        return;
-      }
-    } catch (_) {}
-
-    try {
-      const name = encodeURIComponent(CONFIG.riotName);
-      const tag = encodeURIComponent(CONFIG.riotTag);
-
-      // HenrikDev API v2 — cuenta + rango (pública, sin key)
-      const [accountRes, mmrRes] = await Promise.all([
-        fetch(`https://api.henrikdev.xyz/valorant/v1/account/${name}/${tag}`),
-        fetch(`https://api.henrikdev.xyz/valorant/v2/mmr/latam/${name}/${tag}`)
-      ]);
-
-      if (!accountRes.ok) throw new Error("Cuenta Valorant no encontrada");
-      const account = (await accountRes.json()).data;
-      const mmrData = mmrRes.ok ? (await mmrRes.json()).data : null;
-
-      // Historial últimas 5 partidas para agentes más jugados
-      const matchRes = await fetch(
-        `https://api.henrikdev.xyz/valorant/v3/matches/latam/${name}/${tag}?mode=competitive&size=10`
-      );
-      const matches = matchRes.ok ? (await matchRes.json()).data || [] : [];
-
-      renderValorant({ account, mmrData, matches });
-    } catch (e) {
-      showError("valo-content", `Error: ${e.message}. La API externa puede estar limitada.`);
-    }
-  }
-
-  function renderValorant(data) {
-    if (data.error) {
-      showError("valo-content", data.error);
-      return;
-    }
-
-    const account = data.account || {};
-    const rango   = data.rango;
-    const agentes = data.agentes || [];
-    const roles   = data.roles   || [];
-
-    // Avatar
-    const avatarEl  = document.getElementById("valo-avatar");
-    const avatarImg = document.getElementById("valo-avatar-img");
-    if (account.card_small) {
-      avatarImg.src = account.card_small;
-      avatarImg.style.display = "block";
-      avatarEl.classList.remove("skeleton");
-    }
-
-    // Nombre
-    document.getElementById("valo-name").textContent = data.nombre || `${CONFIG.riotName} #${CONFIG.riotTag}`;
-
-    // Rango
-    const rankEl = document.getElementById("valo-rank");
-    if (rango?.tier) {
-      rankEl.innerHTML = `
-        ${rango.rank_img ? `<img class="rank-img" src="${rango.rank_img}" alt="${rango.tier}" />` : ""}
-        <span class="rank-text">${rango.tier}</span>
-        <span class="rank-lp">${rango.rr || 0} RR</span>
-      `;
-    } else {
-      rankEl.innerHTML = `<span class="rank-text" style="color:var(--text-sec)">Sin clasificar</span>`;
-    }
-
-    // Agentes más jugados
-    const roleEmoji = { Duelista:"⚡", Controlador:"💨", Iniciador:"🔦", Centinela:"🔒" };
-    if (agentes.length) {
-      document.getElementById("valo-agents").innerHTML = agentes.map(a => {
-        const agentSlug = a.agente.toLowerCase().replace(/[^a-z]/g, "");
-        return `
-          <div class="champ-card">
-            <img class="champ-img"
-              src="https://media.valorant-api.com/agents/${agentSlug}/displayiconsmall.png"
-              alt="${a.agente}"
-              onerror="this.style.display='none'" />
-            <span class="champ-name">${a.agente}</span>
-            <span class="champ-points">${a.partidas} partidas</span>
-          </div>`;
-      }).join("");
-    } else {
-      document.getElementById("valo-agents").innerHTML = `<span class="status-msg">Sin partidas recientes.</span>`;
-    }
-
-    // Roles
-    if (roles.length) {
-      document.getElementById("valo-roles").innerHTML = roles.map((r, i) => `
-        <div class="role-pill ${i===0?'top-1':i===1?'top-2':''}">
-          <span class="role-icon">${roleEmoji[r.rol]||"🎮"}</span>
-          <span>${r.rol}</span>
-          <span class="role-num">${r.partidas}×</span>
-        </div>`).join("");
-    }
-  }
+  // Valorant usa iframe de tracker.gg — no necesita JS adicional.
 
   /* ===== HELPERS ===== */
   function showError(containerId, msg) {
@@ -792,7 +723,6 @@
   /* ===== INIT ===== */
   checkTwitch();
   loadLoL();
-  loadValorant();
 
   // Re-chequea Twitch cada 2 minutos
   setInterval(checkTwitch, 120_000);
