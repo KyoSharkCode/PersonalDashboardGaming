@@ -180,7 +180,6 @@
     }
 
     .badge-lol { background: rgba(200,155,60,0.15); color: #c89b3c; border: 1px solid rgba(200,155,60,0.3); }
-    .badge-valo { background: rgba(255,70,85,0.15); color: #ff4655; border: 1px solid rgba(255,70,85,0.3); }
 
     .section-title {
       font-size: 18px;
@@ -502,41 +501,6 @@
       to   { opacity: 1; transform: translateY(0); }
     }
 
-    /* ===== TRACKER IFRAME ===== */
-    .tracker-link {
-      margin-left: auto;
-      font-size: 12px;
-      font-weight: 600;
-      color: #ff4655;
-      text-decoration: none;
-      opacity: 0.8;
-      transition: opacity 150ms ease;
-    }
-    .tracker-link:hover { opacity: 1; }
-
-    .tracker-iframe {
-      width: 100%;
-      min-height: 520px;
-      border: none;
-      border-radius: 12px;
-      background: var(--card2);
-      display: block;
-    }
-
-    .tracker-fallback {
-      margin-top: 12px;
-      font-size: 12px;
-      color: var(--text-ter);
-      text-align: center;
-    }
-
-    .tracker-fallback a {
-      color: #ff4655;
-      text-decoration: none;
-      font-weight: 600;
-    }
-    .tracker-fallback a:hover { text-decoration: underline; }
-
     /* ===== FOOTER ===== */
     footer {
       text-align: center;
@@ -666,33 +630,6 @@
     </div>
   </div>
 
-  <!-- VALORANT SECTION -->
-  <div class="section-card" id="valo-card">
-    <div class="section-header">
-      <span class="game-badge badge-valo">Valorant</span>
-      <a href="https://tracker.gg/valorant/profile/riot/Galactic%20Shark%23AYK/overview"
-         target="_blank" rel="noopener" class="tracker-link">
-        Ver en tracker.gg ↗
-      </a>
-    </div>
-    <div id="valo-content">
-      <iframe
-        src="https://tracker.gg/valorant/profile/riot/Galactic%20Shark%23AYK/overview?embed=true"
-        class="tracker-iframe"
-        title="Valorant Stats — Galactic Shark #AYK"
-        allowfullscreen
-        loading="lazy">
-      </iframe>
-      <div class="tracker-fallback">
-        <p>Si el panel no carga, puedes ver tus stats directamente en</p>
-        <a href="https://tracker.gg/valorant/profile/riot/Galactic%20Shark%23AYK/overview"
-           target="_blank" rel="noopener">
-          tracker.gg/valorant/Galactic Shark #AYK ↗
-        </a>
-      </div>
-    </div>
-  </div>
-
   <footer>Made with Studio</footer>
 </div>
 
@@ -725,8 +662,7 @@
     twitchChannel: "KyoSumiVT",
     // API key solo para desarrollo local.
     // En producción (GitHub Pages) carga los datos
-    // desde datos_lol.json y datos_valo.json
-    // generados por tus scripts Python.
+    // desde datos_lol.json, generado por actualizar_stats.py.
     apiKey: ""   // <-- pega tu key aquí solo en local
   };
 
@@ -950,8 +886,6 @@
       histEl.innerHTML = `<div class="status-msg">Sin historial disponible.</div>`;
     }
   }
-
-  // Valorant usa iframe de tracker.gg — no necesita JS adicional.
 
   /* ===== HELPERS ===== */
   function showError(containerId, msg) {
