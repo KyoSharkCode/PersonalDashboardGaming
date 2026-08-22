@@ -374,4 +374,4 @@ def generar_datos_valo():
 # ─────────────────────────────────────────────────
 if __name__ == "__main__":
     generar_datos_lol()
-    log("🎉 ¡Todo actualizado! (Valorant usa iframe de tracker.gg)")
+    log("🎉 ¡Todo actualizado! (Valorant en pausa por ahora — la función generar_datos_valo() queda lista para retomarla más adelante.)")
