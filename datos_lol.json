@@ -3,21 +3,21 @@
   "region": "LA1",
   "summoner": {
     "profileIconId": 6664,
-    "summonerLevel": 431
+    "summonerLevel": 432
   },
   "soloQ": {
     "tier": "SILVER",
     "rank": "I",
-    "lp": 0,
-    "wins": 11,
-    "losses": 11,
-    "winrate": 50
+    "lp": 50,
+    "wins": 15,
+    "losses": 18,
+    "winrate": 45
   },
   "maestria": [
     {
       "championId": 84,
       "championName": "Akali",
-      "points": 330654,
+      "points": 332529,
       "level": 31
     },
     {
@@ -27,16 +27,16 @@
       "level": 20
     },
     {
+      "championId": 876,
+      "championName": "Lillia",
+      "points": 153615,
+      "level": 17
+    },
+    {
       "championId": 55,
       "championName": "Katarina",
       "points": 143015,
       "level": 15
-    },
-    {
-      "championId": 876,
-      "championName": "Lillia",
-      "points": 142610,
-      "level": 16
     },
     {
       "championId": 498,
@@ -51,46 +51,50 @@
       "partidas": 9
     },
     {
-      "champ": "Poppy",
+      "champ": "Maokai",
       "partidas": 1
     }
   ],
   "roles": [
     {
       "rol": "JUNGLE",
-      "partidas": 10
+      "partidas": 9
+    },
+    {
+      "rol": "UTILITY",
+      "partidas": 1
     }
   ],
   "historial": [
     {
       "campeon": "Lillia",
-      "kda": "6/5/5 (2.2)",
+      "kda": "1/6/10 (1.8)",
       "resultado": "Derrota",
-      "duracion": "32min"
-    },
-    {
-      "campeon": "Lillia",
-      "kda": "9/1/10 (19.0)",
-      "resultado": "Victoria",
       "duracion": "27min"
     },
     {
       "campeon": "Lillia",
-      "kda": "5/11/17 (2.0)",
-      "resultado": "Victoria",
-      "duracion": "42min"
+      "kda": "3/9/15 (2.0)",
+      "resultado": "Derrota",
+      "duracion": "35min"
+    },
+    {
+      "campeon": "Maokai",
+      "kda": "1/4/9 (2.5)",
+      "resultado": "Derrota",
+      "duracion": "23min"
     },
     {
       "campeon": "Lillia",
-      "kda": "3/11/13 (1.5)",
-      "resultado": "Derrota",
-      "duracion": "36min"
+      "kda": "2/3/10 (4.0)",
+      "resultado": "Victoria",
+      "duracion": "24min"
     },
     {
-      "campeon": "Poppy",
-      "kda": "10/8/3 (1.6)",
+      "campeon": "Lillia",
+      "kda": "2/8/12 (1.8)",
       "resultado": "Derrota",
-      "duracion": "29min"
+      "duracion": "34min"
     }
   ],
   "ddraggon_ver": "14.24.1"
